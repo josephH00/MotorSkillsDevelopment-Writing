@@ -2,6 +2,8 @@ let db = null;
 let userData;
 let UIElements = [];
 
+const defaultSaveStructure = { progress: 0, accuracy: 0, completed: 0}; //The save structure that will be created for a new player
+
 /* == */
 const gameStates = {
   DATAINIT: 'datainit',
@@ -19,11 +21,11 @@ const dynamicUIAnimationState = {
   STARTUP: 'startup' //For when the animation / game is just loaded
 }
 class DynamicUI {
-  constructor(x, y, w, h, runCallback, startupCallback) {
+  constructor(x, y, runCallback, startupCallback, configJSON) {
     this.x = x;
     this.y = y;
-    this.width = w;
-    this.height = h;
+
+    this.config = configJSON;
 
     this.runCallback = runCallback;
     this.startupCallback = startupCallback;
@@ -65,7 +67,8 @@ function preload() {
     userData = JSON.parse(userData); //Convert existing value to JSON Object
   } else {
     console.log("Creating new user profile");
-    storeItem( "drawingUserProgress", JSON.stringify({ progress: 0, accuracy: 0, completed: 0}) ); //TODO: Figure out implementation
+    userData = defaultSaveStructure;
+    storeItem( "drawingUserProgress", JSON.stringify(userData) ); //TODO: Figure out implementation
   }
 }
 
@@ -75,11 +78,37 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
 
   //Top header
-  UIElements.push( new DynamicUI(0,0, windowWidth+1, windowHeight/12, function(d) {
+  UIElements.push( new DynamicUI(0,0, function(d) {
       fill(color(238, 238, 238));
-      rect(this.x, this.y, this.width, this.height);
-    }, function(d) {} 
+      rect(this.x, this.y, this.config.width, this.config.height);
+    }, function(d) {},
+    {
+      width: windowWidth + 1,
+      height: windowHeight / 12
+    }
   ) );
+
+  //Progress indicator
+  UIElements.push( new DynamicUI(0, 0, function() {
+      textSize(this.config.uiTextSize);
+      
+      this.x = windowWidth - textWidth("Accuracy: XX%  "); //Adjust x at runtime based on size
+
+      let buffer = { x: textWidth(" "), y: textAscent() * 3/4 } //Create buffer btw. box & text
+      let sizeBox = { w: windowWidth - this.x - buffer.x, h: textAscent() + buffer.y }
+
+      fill(color(247, 247, 247));
+      rect(this.x - buffer.x, this.y, sizeBox.w, sizeBox.h); //Set space for rect
+
+      fill(color(51, 51, 51));
+      text("Accuracy: " + userData.accuracy.toString() + "% ", this.x, this.y+textAscent() + buffer.y/2);
+    }, function() {},
+    {
+      uiTextSize: 14,
+    }
+  ) );
+
+  gameState = gameStates.GAME_DYNUSERUPDATE;
 }
 
 function draw() {
