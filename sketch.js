@@ -1,6 +1,16 @@
 let db = null;
 let userData;
 let UIElements = [];
+let gameState = null;
+
+/* == */
+const gameStates = {
+  DATAINIT: 'datainit',
+  STARTUPUI: 'startupui',
+  GAME_DYNUSERUPDATE: 'dynuserupdate', //Dynamic UI user update (aka main game content)
+  GAME_UPDATEUSERSCORE: 'updateuserscore',
+  GAME_GETNEWTASK: 'getnewtask' //Loads the next task / thing to draw
+}
 
 /* == */
 const dynamicUIAnimationState = {
@@ -63,11 +73,11 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
 
   //Top header
-  UIElements.push( new DynamicUI(0,0, windowWidth, windowHeight/12, function(d) {
+  UIElements.push( new DynamicUI(0,0, windowWidth+1, windowHeight/12, function(d) {
       fill(color(238, 238, 238));
       rect(this.x, this.y, this.width, this.height);
     }, function(d) {} 
-  ));
+  ) );
 }
 
 function draw() {
