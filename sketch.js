@@ -1,7 +1,6 @@
 let db = null;
 let userData;
 let UIElements = [];
-let gameState = null;
 
 /* == */
 const gameStates = {
@@ -11,6 +10,7 @@ const gameStates = {
   GAME_UPDATEUSERSCORE: 'updateuserscore',
   GAME_GETNEWTASK: 'getnewtask' //Loads the next task / thing to draw
 }
+let gameState = gameStates.DATAINIT;
 
 /* == */
 const dynamicUIAnimationState = {
