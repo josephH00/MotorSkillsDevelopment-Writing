@@ -70,6 +70,8 @@ function preload() {
 }
 
 function setup() {
+  gameState = gameStates.STARTUPUI; //preload() is called under the DATAINIT state & will automatically transition to the setup() when synchronously finished
+
   createCanvas(windowWidth, windowHeight);
 
   //Top header
@@ -84,5 +86,10 @@ function draw() {
   background(220);
   for(let i = 0; i < UIElements.length; i++) {
     UIElements[i].tick();
+  }
+
+  switch(gameState) { //Handle states
+    default:
+      break;
   }
 }
