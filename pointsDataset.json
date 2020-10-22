@@ -1,0 +1,13 @@
+{"symbols": {
+    "total" : 36,
+    "A" : [
+        {"points": 5},
+        {"x": 1, "y": 1, "connected": true},
+        {"x": 0.5, "y": 1, "connected": true},
+        {"x": 1, "y": 1, "connected": true},
+        {"x": 0.25, "y": 0.5, "connected": false},
+        {"x": 0.75, "y": 0.5, "connected": true}
+    ]
+}
+
+}
