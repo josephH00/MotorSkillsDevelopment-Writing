@@ -8,4 +8,4 @@ The game is designed to be integrated as a single .js file, the other files are 
 * Clone Repo
 * Open index.html
 
-All dependencies are included (local files for development will be embedded into the .js in later builds)
+All dependencies are included (local config files will be embedded into the .js in later builds)
