@@ -228,7 +228,7 @@ function createDrawingArea() {
       let preprocessUD = db["symbols"][targetIndex];
       
       this.config.drawingExerciseType = targetIndex;
-
+      console.log(targetIndex, db);
       for(let j = 0; j < preprocessUD.length; j++ ) {
         let CCSPointXY = this.config.CCSJSONRelativeToAbs(
           preprocessUD[j]["x"],
@@ -438,8 +438,15 @@ function preload() {
   } else {
     console.log("Creating new user profile");
     userData = defaultSaveStructure;
-    storeItem( "drawingUserProgress", JSON.stringify(userData) ); //TODO: Figure out implementation
+    storeItem( "drawingUserProgress", JSON.stringify(userData) );
   }
+
+  if(userData.completed != undefined) { //The userData structure was changed some time ago & older versions may error out when encounter an older save structure
+    userData.currentExercise = userData.completed; //Copy data
+    delete userData.completed; //Remove old version
+    storeItem( "drawingUserProgress", JSON.stringify(userData) );
+  }
+
 }
 
 function setup() {
