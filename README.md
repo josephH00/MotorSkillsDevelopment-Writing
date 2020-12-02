@@ -1,4 +1,4 @@
-# MotorSkillsDevelopment-Writing
+# MotorSkillsDevelopment: Writing
 A game designed for repetitive fine motion training.
 
 Based on p5.js (the Processing wrapper for JavaScript), this game (while standalone) was designed in conjunction with a set of other modules to be submitted as a project in my Introduction to Engineering class at Arizona State University.
