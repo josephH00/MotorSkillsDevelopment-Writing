@@ -1,4 +1,4 @@
-let db = `{"symbols":{"total":1,"mapping":["A"],"A":[{"x":-0.388,"y":-0.467,"section":1},{"x":-0.3505999999999999,"y":-0.3728000000000002,"section":1},{"x":-0.3131999999999998,"y":-0.2786000000000001,"section":1},{"x":-0.27580000000000016,"y":-0.18439999999999987,"section":1},{"x":-0.23839999999999964,"y":-0.09019999999999982,"section":1},{"x":-0.201,"y":0.004,"section":1},{"x":-0.1635999999999999,"y":0.09820000000000005,"section":1},{"x":-0.1261999999999998,"y":0.1924000000000001,"section":1},{"x":-0.08879999999999973,"y":0.2865999999999999,"section":1},{"x":-0.05140000000000009,"y":0.38079999999999997,"section":1},{"x":-0.014,"y":0.475,"section":1},{"x":0.02580000000000018,"y":0.38079999999999997,"section":2},{"x":0.06560000000000037,"y":0.2865999999999999,"section":2},{"x":0.10540000000000009,"y":0.1924000000000001,"section":2},{"x":0.14519999999999983,"y":0.09819999999999982,"section":2},{"x":0.185,"y":0.004,"section":2},{"x":0.2248000000000002,"y":-0.09020000000000004,"section":2},{"x":0.2645999999999999,"y":-0.1844000000000001,"section":2},{"x":0.3044000000000001,"y":-0.2786000000000001,"section":2},{"x":0.34419999999999984,"y":-0.3728000000000002,"section":2},{"x":0.384,"y":-0.467,"section":2},{"x":-0.236,"y":-0.147,"section":3},{"x":-0.194909090909091,"y":-0.14699999999999977,"section":3},{"x":-0.153818181818182,"y":-0.147,"section":3},{"x":-0.11272727272727298,"y":-0.147,"section":3},{"x":-0.07163636363636351,"y":-0.147,"section":3},{"x":-0.030545454545454504,"y":-0.147,"section":3},{"x":0.010545454545454504,"y":-0.147,"section":3},{"x":0.051636363636363515,"y":-0.147,"section":3},{"x":0.09272727272727298,"y":-0.147,"section":3},{"x":0.13381818181818197,"y":-0.147,"section":3},{"x":0.174909090909091,"y":-0.147,"section":3},{"x":0.216,"y":-0.147,"section":3}]}}`;
+let db = `{"symbols":{"total":2,"mapping":["A","N"],"A":[{"x":-0.388,"y":-0.467,"section":1},{"x":-0.3505999999999999,"y":-0.3728000000000002,"section":1},{"x":-0.3131999999999998,"y":-0.2786000000000001,"section":1},{"x":-0.27580000000000016,"y":-0.18439999999999987,"section":1},{"x":-0.23839999999999964,"y":-0.09019999999999982,"section":1},{"x":-0.201,"y":0.004,"section":1},{"x":-0.1635999999999999,"y":0.09820000000000005,"section":1},{"x":-0.1261999999999998,"y":0.1924000000000001,"section":1},{"x":-0.08879999999999973,"y":0.2865999999999999,"section":1},{"x":-0.05140000000000009,"y":0.38079999999999997,"section":1},{"x":-0.014,"y":0.475,"section":1},{"x":0.02580000000000018,"y":0.38079999999999997,"section":2},{"x":0.06560000000000037,"y":0.2865999999999999,"section":2},{"x":0.10540000000000009,"y":0.1924000000000001,"section":2},{"x":0.14519999999999983,"y":0.09819999999999982,"section":2},{"x":0.185,"y":0.004,"section":2},{"x":0.2248000000000002,"y":-0.09020000000000004,"section":2},{"x":0.2645999999999999,"y":-0.1844000000000001,"section":2},{"x":0.3044000000000001,"y":-0.2786000000000001,"section":2},{"x":0.34419999999999984,"y":-0.3728000000000002,"section":2},{"x":0.384,"y":-0.467,"section":2},{"x":-0.236,"y":-0.147,"section":3},{"x":-0.194909090909091,"y":-0.14699999999999977,"section":3},{"x":-0.153818181818182,"y":-0.147,"section":3},{"x":-0.11272727272727298,"y":-0.147,"section":3},{"x":-0.07163636363636351,"y":-0.147,"section":3},{"x":-0.030545454545454504,"y":-0.147,"section":3},{"x":0.010545454545454504,"y":-0.147,"section":3},{"x":0.051636363636363515,"y":-0.147,"section":3},{"x":0.09272727272727298,"y":-0.147,"section":3},{"x":0.13381818181818197,"y":-0.147,"section":3},{"x":0.174909090909091,"y":-0.147,"section":3},{"x":0.216,"y":-0.147,"section":3}],"N":[{"x":-0.334,"y":-0.477,"section":1},{"x":-0.334,"y":-0.3752222222222222,"section":1},{"x":-0.334,"y":-0.2734444444444443,"section":1},{"x":-0.334,"y":-0.17166666666666675,"section":1},{"x":-0.334,"y":-0.06988888888888892,"section":1},{"x":-0.334,"y":0.03188888888888891,"section":1},{"x":-0.334,"y":0.13366666666666663,"section":1},{"x":-0.334,"y":0.23544444444444435,"section":1},{"x":-0.334,"y":0.33722222222222215,"section":1},{"x":-0.334,"y":0.439,"section":1},{"x":-0.2604444444444446,"y":0.3372222222222222,"section":2},{"x":-0.1868888888888889,"y":0.23544444444444446,"section":2},{"x":-0.11333333333333348,"y":0.13366666666666663,"section":2},{"x":-0.03977777777777783,"y":0.03188888888888891,"section":2},{"x":0.03377777777777783,"y":-0.06988888888888892,"section":2},{"x":0.10733333333333325,"y":-0.17166666666666663,"section":2},{"x":0.1808888888888889,"y":-0.2734444444444443,"section":2},{"x":0.25444444444444436,"y":-0.3752222222222222,"section":2},{"x":0.328,"y":-0.477,"section":2},{"x":0.3279999999999998,"y":-0.37366666666666654,"section":3},{"x":0.328,"y":-0.27033333333333326,"section":3},{"x":0.328,"y":-0.16700000000000012,"section":3},{"x":0.328,"y":-0.06366666666666675,"section":3},{"x":0.328,"y":0.039666666666666746,"section":3},{"x":0.328,"y":0.143,"section":3},{"x":0.328,"y":0.24633333333333327,"section":3},{"x":0.328,"y":0.3496666666666666,"section":3},{"x":0.328,"y":0.453,"section":3}]}}`;
 let userData;
 let UIElements = [];
 
@@ -224,11 +224,12 @@ function createDrawingArea() {
     }, function(d) {
       //Load the newest exercise
       let newDataIndex = userData.currentExercise;
+      //console.log("NDE ", newDataIndex)
       let targetIndex = db["symbols"].mapping[newDataIndex];
       let preprocessUD = db["symbols"][targetIndex];
       
       this.config.drawingExerciseType = targetIndex;
-      console.log(targetIndex, db);
+      //console.log(targetIndex, db);
       for(let j = 0; j < preprocessUD.length; j++ ) {
         let CCSPointXY = this.config.CCSJSONRelativeToAbs(
           preprocessUD[j]["x"],
@@ -287,7 +288,7 @@ function createDrawingArea() {
       oComputeGeometryInfo: function(a, b) {
         let dY = this.CCSY(b.y) - this.CCSY(a.y); //Delta Y
         let dX = this.CCSX(b.x) - this.CCSX(a.x); //Delta X
-        if(dX == 0) return { slope: null, dx: dX, dy: dY };
+        if(dX == 0) return { slope: null, dx: dX, dy: dY, distanceToNextPoint: Math.sqrt(Math.pow(dX,2) + Math.pow(dY, 2)) };
         return { slope: dY / dX, dx: dX, dy: dY, distanceToNextPoint: Math.sqrt(Math.pow(dX,2) + Math.pow(dY, 2)) }; //Slope between the current point and the next point, Delta X's & Y's, and distance
       },
     
@@ -375,7 +376,7 @@ function createDrawingArea() {
             let distPointAndMouse = this.oDist(this.oCCS(this.pointsArray[i]), this.mouseArray[j]); //Distance between the predefined point & the mouse point
             
             let thisPointPreComputedSlope = this.pointsArray[i].preComputedSlope; //Find the precomputed direction & slope data from the current point
-            
+            //console.log(thisPointPreComputedSlope);
             let nextPointPreComputedSlope = null; //Find the precomputed direction & slope data from the next point
             let p2x = null;
             let p2y = null;
@@ -393,16 +394,23 @@ function createDrawingArea() {
               continue; //If at the end of the points array just skip it, there's nothing that can be done (this should just repeatedly skip the j loop until it ends)
             
             function boundaryYEqu(oX, oY, nX, oSlope) { return oSlope*(nX - oX) + oY; } //Computes the Y value of the slope of the two boundary lines (from this point to the next point), aka y=mx
-      
+            
             if(distPointAndMouse < 4*thisPointPreComputedSlope.distanceToNextPoint) { //We write left to right, so any point should be more right to the reference
+              
               let withinY1Bound = (my < boundaryYEqu(px, py, mx, -thisPointPreComputedSlope.slope)); //i point
               let withinY2Bound = (my > boundaryYEqu(p2x, p2y, mx, -nextPointPreComputedSlope.slope)); //i+1 point
-      
+              if(distPointAndMouse < thisPointPreComputedSlope.distanceToNextPoint)
+                console.log(distPointAndMouse, withinY1Bound, withinY2Bound, thisPointPreComputedSlope );
+
               if( (  (withinY1Bound == true && withinY2Bound == true) || (withinY1Bound == false && withinY2Bound == false)  )
-                  || (  px < mx && mx < p2x && thisPointPreComputedSlope.slope == 0 ) ) { //Will render if within the correct Y bounds, if the points are upside down both will be false otherwise both will be true. Or if the slope is 0 (horizontal) & within the correct x bounds between points
+                  || (  px < mx && mx < p2x && thisPointPreComputedSlope.slope == 0 )
+                  || (  p2x <= mx && mx <= px && Math.floor(thisPointPreComputedSlope.slope) == -0) ) { //Will render if within the correct Y bounds, if the points are upside down both will be false otherwise both will be true. Or if the slope is 0 (horizontal) & within the correct x bounds between points
                 
                 possibleOverlappingPointAreas.push( {referencePointIndex: i, mousePointIndex: j, RToMDist: distPointAndMouse} ); //Add to list when a point falls within the bounds of the reference points
               }
+              //if(thisPointPreComputedSlope.slope == null)
+              //  console.log(withinY1Bound, withinY2Bound, py > p2y);
+              //
       
             }
             if(this.pointsArray[i].mappedPoint != null)
@@ -519,9 +527,9 @@ function draw() {
         let cUIConf = cUI.getConfig();
         if(cUI.isThisElementClass(dynUIUUIDS.DRAWINGAREA) == true) { //Find the drawing area element
 
-          console.log("PM ", cUIConf.calculateStatistics().pointsMapped)
+          //console.log("PM ", cUIConf.calculateStatistics().pointsMapped)
 
-          if(cUIConf.calculateStatistics().pointsMapped >= cUIConf.automaticMappedPointsPercentageCutoff) { //Switch at the designated cutoff
+          if(cUIConf.calculateStatistics().pointsMapped >= cUIConf.automaticMappedPointsPercentageCutoff && mouseIsPressed == false) { //Switch at the designated cutoff when the mouse is released
             gameState = gameStates.GAME_GETNEWTASK; //Update user data & UI
           }
         }
@@ -564,7 +572,7 @@ function draw() {
       if(userData.currentExercise + 1 >= db["symbols"].total) //Roll back to the first exercise if it is bigger than the max
         userData.currentExercise = 0;
       else  
-        userData.currentExercise++
+        userData.currentExercise++;
 
       userData.attempts.push({
         type: exerciseType,
