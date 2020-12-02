@@ -39,7 +39,8 @@ const dynUIUUIDS = {
   TOPHEADER: 'TOPHEADER',
   UPPERACCURACY: 'UPPERACCURACY',
   USERCARD: 'USERCARD',
-  DRAWINGAREA: 'DRAWINGAREA'
+  DRAWINGAREA: 'DRAWINGAREA',
+  ATTRIBUTION: 'ATTRIBUTION'
 }
 const dynamicUIAnimationState = {
   RUNNING: 'running', //During normal animation loop
@@ -478,7 +479,7 @@ function setup() {
   UIElements.push( new DynamicUI(dynUIUUIDS.UPPERACCURACY, 0, 0, function() {
       textSize(this.config.uiTextSize);
       
-      this.config.x = windowWidth - textWidth("Accuracy: XX%  "); //Adjust x at runtime based on size of the text
+      this.config.x = windowWidth - textWidth("Game Accuracy: XX%  "); //Adjust x at runtime based on size of the text
 
       let buffer = { x: textWidth(" "), y: textAscent() * 3/4 } //Create buffer between box & text
       let sizeBox = { w: windowWidth - this.config.x - buffer.x, h: textAscent() + buffer.y }
@@ -487,12 +488,33 @@ function setup() {
       rect(this.config.x - buffer.x, this.config.y, sizeBox.w, sizeBox.h); //Set space for rect
 
       fill(color(51, 51, 51));
-      text("Accuracy: " + (100 * userData.gameAccuracy).toFixed(0) + "% ", this.config.x, this.config.y + textAscent() + buffer.y/2);
+      text("Game Accuracy: " + (100 * userData.gameAccuracy).toFixed(0) + "% ", this.config.x, this.config.y + textAscent() + buffer.y/2);
     }, function() {},
     {
       uiTextSize: 14,
     }
   ) );
+
+  UIElements.push( new DynamicUI(dynUIUUIDS.ATTRIBUTION, 0, 0, function() {
+    textSize(this.config.uiTextSize);
+    this.config.x = windowWidth - textWidth(" Made by Joseph Hand  "); //Thanks Jason for crippling my effort & code ;)
+    this.config.y = windowHeight - textAscent("W") * 1.5;
+    let buffer = { x: textWidth(""), y: textAscent() * 3/4 } //Create buffer between box & text
+    let sizeBox = { w: windowWidth - this.config.x - buffer.x, h: textAscent() + buffer.y }
+
+    fill(color(247, 247, 247));
+    rect(this.config.x - buffer.x, this.config.y, sizeBox.w, sizeBox.h); //Set space for rect
+
+    fill(color(51, 51, 51));
+    text(" Made by Joseph Hand", this.config.x, this.config.y + textAscent() + buffer.y/2);
+  }, function() {
+
+  }, 
+    {
+      uiTextSize: 14
+    }
+  ) )
+
 
   //Load previous attempts from userData if available
   if(userData.attempts.length > 0)
