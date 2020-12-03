@@ -275,7 +275,7 @@ function createDrawingArea() {
       pointsArray: [],
       internalTickCounter: 0,
 
-      automaticMappedPointsPercentageCutoff: 0.60, //60% cut off when the stage ends
+      automaticMappedPointsPercentageCutoff: 0.30, //30% minimum cut off when the stage ends
       mouseInactiveTimeout: 1500, //The milliseconds when the mouse isn't moving & is above the cutoff
       lastTimeMouseMoved: null,
       isFinishedWithExercise: function() { //Calculates if the automatic cutoff has been reached and the user has stopped moving their mouse for a specified period of time
@@ -361,7 +361,7 @@ function createDrawingArea() {
             overallAccuracyTotalNumberOfAttempts++;
           }
         }
-        
+
         let newOverallAccuracy = ( overallAccuracyNumerator + acc ) / ( overallAccuracyTotalNumberOfAttempts + 1 ); //Add in the new score for the drawing area
 
         let nPointsArray = this.pointsArray; //Find closest and longest distances, make a copy of the pointsArray & sort that
@@ -402,8 +402,9 @@ function createDrawingArea() {
         let accuracyScore = this.calculateAccuracy(); //Dynamic HUD for exercise accuracy
         let pointsMappedPercent = accuracyScore.pointsMappedLength / this.pointsArray.length;
         if(isNaN(accuracyScore.accuracy) == false) {
-          rect(width/2 - this.sketchZone.width/2, height/2 + this.sketchZone.height/2, textWidth("Accuracy: ##% Completed: ##%"), textAscent("W"));
-          text("Accuracy: " + (100 * accuracyScore.accuracy).toFixed(0) + "%" + " Completed: " + (100 * pointsMappedPercent).toFixed(0) + "%", width/2 - this.sketchZone.width/2, height/2 + this.sketchZone.height/2 + textAscent("W")*0.9);
+          textSize(textScaling.scale(12));
+          rect(width/2 - this.sketchZone.width/2, height/2 + this.sketchZone.height/2, textWidth(" Accuracy: ##% Completed: ##%"), textAscent("W") * 1.15);
+          text(" Accuracy: " + (100 * accuracyScore.accuracy).toFixed(0) + "%" + " Completed: " + (100 * pointsMappedPercent).toFixed(0) + "%", width/2 - this.sketchZone.width/2, height/2 + this.sketchZone.height/2 + textAscent("W"));
         }
       },
       drawPoints: function(drawDebug) {
@@ -533,9 +534,6 @@ function createTransitionElement(previousDrawingArea) {
     for(let i = 0; i < this.config.feedbackDialogInfo.length; i++) {
       text(this.config.feedbackDialogInfo[i].label + this.config.feedbackDialogInfo[i].data, this.config.x + (windowWidth - 2 * this.config.widthHeightBounds.w)/2 , this.config.y + this.config.widthHeightBounds.h + (i) * textDivision);
     }
-    
-    
-
 
   }, function() {
     this.config.x = this.config.widthHeightBounds.w;
