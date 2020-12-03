@@ -30,7 +30,8 @@ const gameStates = {
   STARTUPUI: 'startupui',
   GAME_DYNUSERUPDATE: 'dynuserupdate', //Dynamic UI user update (aka main game content)
   GAME_UPDATEUSERSCORE: 'updateuserscore',
-  GAME_GETNEWTASK: 'getnewtask' //Loads the next task / thing to draw
+  GAME_GETNEWTASK: 'getnewtask', //Loads the next task / thing to draw,
+  GAME_PROGRESSTRANSITION: 'progresstransition'
 }
 let gameState = gameStates.DATAINIT;
 
@@ -40,15 +41,23 @@ const dynUIUUIDS = {
   UPPERACCURACY: 'UPPERACCURACY',
   USERCARD: 'USERCARD',
   DRAWINGAREA: 'DRAWINGAREA',
-  ATTRIBUTION: 'ATTRIBUTION'
+  ATTRIBUTION: 'ATTRIBUTION',
+  EXERCISETRANSITION: 'EXERCISETRANSITION'
 }
 const dynamicUIAnimationState = {
   RUNNING: 'running', //During normal animation loop
   STOPPED: 'stopped',
   STARTUP: 'startup' //For when the animation / game is just loaded
 }
+const dynDrawingHeights = { //Heights at which to draw the UI Elements (think like culling polygons in 3D graphics)
+  BOTTOM: 99,
+  LEVEL1: 4,
+  LEVEL2: 3,
+  LEVEL3: 2,
+  TOP: 1,
+}
 class DynamicUI {
-  constructor(UIElementClass, x, y, runCallback, startupCallback, configJSON) {
+  constructor(UIElementClass, drawingHeight, x, y, runCallback, startupCallback, configJSON) {
     this.UIElementClass = UIElementClass; //For identifying & finding elements
 
     this.config = configJSON;
@@ -56,6 +65,7 @@ class DynamicUI {
     this.config.x = x;
     this.config.y = y;
 
+    this.config.drawingHeight = drawingHeight; //The height (Z value) for the elements to be positioned (if it's not defined put it at 1, above the minimum)
     this.runCallback = runCallback;
     this.startupCallback = startupCallback;
 
@@ -94,7 +104,20 @@ class DynamicUI {
   isThisElementClass(testElementClassID) {
     return (this.UIElementClass == testElementClassID);
   }
+
+  getDrawHeight() {
+    return this.config.drawingHeight;
+  }
 }
+
+/* == */
+//For sorting the UI elements by the draw height
+Array.prototype.pushSortByDrawingHeight = function(el) {
+  this.push(el);
+  this.sort(function(a, b){
+    return b.getDrawHeight() - a.getDrawHeight();
+  })
+};
 
 /* == */
 function windowResized() {
@@ -111,7 +134,7 @@ function createUserCard(CN, specificAccuracy, imgPreview, specificType, overallA
         UIElements[i].config.updateCardNumber( UIElements[i].config.cardNumber +1 ); //Pushes cards with the same number up or higher up 1
       }
 
-  UIElements.push( new DynamicUI(dynUIUUIDS.USERCARD, 0, 0, function() {
+  UIElements.pushSortByDrawingHeight( new DynamicUI(dynUIUUIDS.USERCARD, dynDrawingHeights.LEVEL1, 0, 0, function() {
     /* Draw Card outline */
     fill(color(251, 251, 251));
     rect(this.config.x + this.config.XYSpacer.x, this.config.y + this.config.XYSpacer.y, this.config.width + 1, this.config.height + 1);
@@ -210,7 +233,7 @@ function createUserCard(CN, specificAccuracy, imgPreview, specificType, overallA
 }
 
 function createDrawingArea() {
-  UIElements.push( new DynamicUI(dynUIUUIDS.DRAWINGAREA, width/2, height/2, function(d) {
+  UIElements.pushSortByDrawingHeight( new DynamicUI(dynUIUUIDS.DRAWINGAREA, dynDrawingHeights.LEVEL1, width/2, height/2, function(d) {
     let elapsedTime = new Date().getTime() - this.config.t1;
     this.config.t1 = new Date().getTime();
     
@@ -314,7 +337,23 @@ function createDrawingArea() {
       
         let acc = Math.abs(1-( averageDrawnLength/PALength/(averageDistBetweenPoints/2) )); //Computes accuracy of the drawn points based on the (average distance between points)/2
         let pM = PALength/this.pointsArray.length; //The percentage of data points that are mapped to drawn points (eg. 93%)
-        return {  accuracy: acc, pointsMapped: pM  }
+        
+        let overallAccuracyNumerator = 0;
+        let overallAccuracyTotalNumberOfAttempts = 0;
+        for(let i = 0; i < userData.attempts.length; i++) { //Recalculate overall accuracy with new data
+          if(userData.attempts[i].type == this.drawingExerciseType) { //Only if it's the same type of exercise
+            overallAccuracyNumerator = overallAccuracyNumerator + userData.attempts[i].accuracy;
+            overallAccuracyTotalNumberOfAttempts++;
+          }
+        }
+        let newOverallAccuracy = ( overallAccuracyNumerator + acc ) / ( overallAccuracyTotalNumberOfAttempts + 1 ); //Add in the new score for the drawing area
+
+        let nPointsArray = this.pointsArray; //Find closest and longest distances, make a copy of the pointsArray & sort that
+        nPointsArray.sort((a,b) => a.distPointAndMouse - b.distPointAndMouse);
+        let longestDistancePointToMouse = nPointsArray[nPointsArray.length - 1].distPointAndMouse;
+        let smallestDistancePointToMouse = nPointsArray[0].distPointAndMouse;
+
+        return {  accuracy: acc, pointsMapped: pM, newOverallAccuracy: newOverallAccuracy, longestPointDist: longestDistancePointToMouse, smallestPointDist: smallestDistancePointToMouse   }
       },
       preComputePointGeometry: function() {
         for(let i = 0; i < this.pointsArray.length; i++) { 
@@ -387,9 +426,15 @@ function createDrawingArea() {
                 p2x = this.CCSX(this.pointsArray[i+1].x);
                 p2y = this.CCSY(this.pointsArray[i+1].y);
               } else {
-                nextPointPreComputedSlope = this.pointsArray[i-1].preComputedSlope; //Else, just use the slope of the previous point (should be the same and continue forward)
-                p2x = this.CCSX(this.pointsArray[i-1].x);
-                p2y = this.CCSY(this.pointsArray[i-1].y);
+                if(i-1 < 0) { //Tries to read from next i, but i is 0
+                  nextPointPreComputedSlope = this.pointsArray[i].preComputedSlope; //Else, just use the slope of the previous point (should be the same and continue forward)
+                  p2x = this.CCSX(this.pointsArray[i].x);
+                  p2y = this.CCSY(this.pointsArray[i].y);
+                } else {
+                  nextPointPreComputedSlope = this.pointsArray[i-1].preComputedSlope; //Else, just use the slope of the previous point (should be the same and continue forward)
+                  p2x = this.CCSX(this.pointsArray[i-1].x);
+                  p2y = this.CCSY(this.pointsArray[i-1].y);
+                }
               } 
             } else
               continue; //If at the end of the points array just skip it, there's nothing that can be done (this should just repeatedly skip the j loop until it ends)
@@ -400,8 +445,6 @@ function createDrawingArea() {
               
               let withinY1Bound = (my < boundaryYEqu(px, py, mx, -thisPointPreComputedSlope.slope)); //i point
               let withinY2Bound = (my > boundaryYEqu(p2x, p2y, mx, -nextPointPreComputedSlope.slope)); //i+1 point
-              if(distPointAndMouse < thisPointPreComputedSlope.distanceToNextPoint)
-                console.log(distPointAndMouse, withinY1Bound, withinY2Bound, thisPointPreComputedSlope );
 
               if( (  (withinY1Bound == true && withinY2Bound == true) || (withinY1Bound == false && withinY2Bound == false)  )
                   || (  px < mx && mx < p2x && thisPointPreComputedSlope.slope == 0 )
@@ -409,9 +452,6 @@ function createDrawingArea() {
                 
                 possibleOverlappingPointAreas.push( {referencePointIndex: i, mousePointIndex: j, RToMDist: distPointAndMouse} ); //Add to list when a point falls within the bounds of the reference points
               }
-              //if(thisPointPreComputedSlope.slope == null)
-              //  console.log(withinY1Bound, withinY2Bound, py > p2y);
-              //
       
             }
             if(this.pointsArray[i].mappedPoint != null)
@@ -437,6 +477,145 @@ function createDrawingArea() {
     }
 
   ) );
+}
+
+function createTransitionElement(previousDrawingArea) {
+  UIElements.pushSortByDrawingHeight( new DynamicUI(dynUIUUIDS.EXERCISETRANSITION, dynDrawingHeights.TOP, 0, 0, function() {
+    if(this.config.initialized == false)
+      return;
+    
+    stroke( 255 - this.config.setFillAdjustForTime(color(255,255,255)) ); //The opacity will change as the transition goes until it's limit
+    rect(this.config.x, this.config.y, windowWidth - 2 * this.config.widthHeightBounds.w, windowHeight - 2 * this.config.widthHeightBounds.h); //Bounding box
+    
+    this.config.setFillAdjustForTime(color(0,0,0)); //Need to fill this
+
+    for(diag of this.config.feedbackDialogHeading) {
+      let exerciseAcc = this.config.lastDrawingElement.getConfig().calculateStatistics().accuracy;
+      if((diag.min <= exerciseAcc && exerciseAcc < diag.max) == false) continue; //Not the right feedback level
+
+      textSize(textScaling.scale(this.config.feedbackFontInfo.heading.size));
+      text(diag.main, this.config.x + this.config.cardBuffer.w, this.config.y + this.config.cardBuffer.h + textAscent("W"));
+      
+      textSize(textScaling.scale(this.config.feedbackFontInfo.subheading.size));
+      text(diag.sub, this.config.x + this.config.cardBuffer.w + textWidth( "W".repeat(this.config.feedbackSubheadingIndentSize) ), this.config.y + this.config.cardBuffer.h + textAscent("W") + this.config.feedbackFontInfo.heading.height);
+    }
+
+    textSize(textScaling.scale(this.config.feedbackFontInfo.subheading.size));
+    image(this.config.drawingElementImage, 
+      this.config.x + this.config.cardBuffer.w + this.config.widthHeightBounds.w/2 - this.config.drawingElementImage.width/2 + textWidth( "W".repeat(this.config.feedbackSubheadingIndentSize) )/ 2,                           //Put in middle of the heading text
+      this.config.y + (this.config.widthHeightBounds.h - textAscent("W") - this.config.feedbackFontInfo.heading.height)/2 + this.config.drawingElementImage.height/2   //After text
+    );
+
+    textSize(textScaling.scale(this.config.feedbackFontInfo.categoryDescriptor.size)); //Draws right-hand-side statistics values
+    let textDivision = (this.config.cardWH.h - this.config.feedbackFontInfo.categoryDescriptor.height * this.config.feedbackDialogInfo.length) / (this.config.feedbackDialogInfo.length + 1); //Divides text spaces into even sections that fit the n number of sections + text height
+    for(let i = 0; i < this.config.feedbackDialogInfo.length; i++) {
+      text(this.config.feedbackDialogInfo[i].label + this.config.feedbackDialogInfo[i].data, this.config.x + (windowWidth - 2 * this.config.widthHeightBounds.w)/2 , this.config.y + this.config.widthHeightBounds.h + (i) * textDivision);
+    }
+    
+    
+
+
+  }, function() {
+    this.config.x = this.config.widthHeightBounds.w;
+    this.config.y = this.config.widthHeightBounds.h;
+
+    for(var font in this.config.feedbackFontInfo) { //Generates the height for the fonts
+      textSize(textScaling.scale(this.config.feedbackFontInfo[font].size));
+      this.config.feedbackFontInfo[font].height = textAscent("W") * 1.15;
+    }
+
+    this.config.drawingElementImage = get( //Grab sketch zone to display in the window
+      width/2 - this.config.lastDrawingElement.getConfig().sketchZone.width/2,
+      height/2 - this.config.lastDrawingElement.getConfig().sketchZone.height/2,
+      this.config.lastDrawingElement.getConfig().sketchZone.width,
+      this.config.lastDrawingElement.getConfig().sketchZone.height
+    );
+    this.config.drawingElementImage.resize(this.config.widthHeightBounds.w  * 1.5 * (1 - this.config.widthHeightBounds.w/windowWidth), 0); //Scale the image to the 150% of the dialog box's width
+
+    let drawingStats = this.config.lastDrawingElement.getConfig().calculateStatistics(); //Get the text to display for stats
+    this.config.feedbackDialogInfo = [
+      { label: "Exercise type: ", data: this.config.lastDrawingElement.getConfig().drawingExerciseType },
+      { label: "Attempt accuracy: ", data: this.config.displayPercent(drawingStats.accuracy, 2) + "%" }, //Accuracy to 2 decimal places
+      { label: "New overall accuracy: ", data: this.config.displayPercent(drawingStats.newOverallAccuracy, 2) + "%" },
+      { label: "Furthest distance from point: ", data: Math.ceil(drawingStats.longestPointDist) + " Units" },
+      { label: "Closest distance to a point: ", data: Math.ceil(drawingStats.smallestPointDist) + " Units"}
+
+    ]
+
+    this.config.transitionMillisInit = millis();
+
+    this.config.initialized = true;
+  }, 
+    {
+      initialized: false,
+      lastDrawingElement: previousDrawingArea,
+      drawingElementImage: null,
+
+      widthHeightBounds: { w: 1/7 * windowWidth, h: 2.5/16 * windowHeight },
+      cardBuffer: { 
+        w: 1/16 * ( windowWidth - 2 * ( 1/7 * windowWidth )    ),
+        h: 1/16 * ( windowHeight - 2 * ( 2.5/16 * windowHeight ) )
+      }, //Buffer to draw from size of card
+      cardWH: { w: windowWidth - 2 * ( 1/7 * windowWidth ), h: windowHeight - 2 * ( 2.5/16 * windowHeight ) },
+
+      feedbackDialogHeading: [ //What to display to the user based on the accuracy of the exercise
+        { 
+          main: "Awesome!",
+          sub: "Let's do something new",
+          min: 0.90,
+          max: 1
+        },
+        {
+          main: "Don't worry",
+          sub: "It'll come back up again",
+          min: 0.75,
+          max: 0.89
+        },
+        {
+          main: "Maybe something else...",
+          sub: "We can work on that one later",
+          min: 0.0,
+          max: 0.74
+        }
+      ],
+      feedbackSubheadingIndentSize: 2,
+      feedbackDialogInfo: [], //Filled out in init() with the actual data
+
+      feedbackFontInfo: {
+        heading: { size: 36, height: null },
+        subheading: { size: 24, height: null},
+        categoryDescriptor: { size: 18, height: null}
+      },
+
+      displayPercent: function(value, place) { //Pretty print decimal values
+        return (100 * value).toFixed(place);
+      },
+    
+      transitionMillisInit: null, //Get the time when the transition element was created, set during init()
+      transitionDurationUntilFade: 5000, //The milliseconds for how long the transition element will last
+      transitionFadeDuration: 1500, //Milliseconds for how long the fade of the UI element lasts
+      setFillAdjustForTime: function(c) {
+        let opacityValue = 255;
+        if( millis() - this.transitionMillisInit > this.transitionDurationUntilFade )
+          opacityValue = map(millis() - this.transitionMillisInit - this.transitionDurationUntilFade,
+                              0,
+                              this.transitionFadeDuration, //Until the period for the transition to end
+                              255,
+                              0);
+
+        c.setAlpha(opacityValue) //Change opacity for text & graphics
+        
+        tint(255, opacityValue); //Change opacity for images
+        fill(c);
+        return opacityValue;
+      },
+
+      getUserUICompletion: function() {
+        return (millis() - this.transitionMillisInit > this.transitionDurationUntilFade + this.transitionFadeDuration) ? true : false;
+      }
+    }
+  ) );
+  
 }
 
 function preload() {
@@ -465,7 +644,7 @@ function setup() {
   frameRate(60);
 
   //Top header
-  UIElements.push( new DynamicUI(dynUIUUIDS.TOPHEADER, 0, 0, function(d) {
+  UIElements.pushSortByDrawingHeight( new DynamicUI(dynUIUUIDS.TOPHEADER, dynDrawingHeights.BOTTOM, 0, 0, function(d) {
       fill(color(238, 238, 238));
       rect(this.config.x, this.config.y, this.config.width, this.config.height);
     }, function(d) {},
@@ -476,7 +655,7 @@ function setup() {
   ) );
 
   //Accuracy indicator
-  UIElements.push( new DynamicUI(dynUIUUIDS.UPPERACCURACY, 0, 0, function() {
+  UIElements.pushSortByDrawingHeight( new DynamicUI(dynUIUUIDS.UPPERACCURACY, dynDrawingHeights.LEVEL1, 0, 0, function() {
       textSize(this.config.uiTextSize);
       
       this.config.x = windowWidth - textWidth("Game Accuracy: XX%  "); //Adjust x at runtime based on size of the text
@@ -495,7 +674,7 @@ function setup() {
     }
   ) );
 
-  UIElements.push( new DynamicUI(dynUIUUIDS.ATTRIBUTION, 0, 0, function() {
+  UIElements.pushSortByDrawingHeight( new DynamicUI(dynUIUUIDS.ATTRIBUTION, dynDrawingHeights.LEVEL1, 0, 0, function() {
     textSize(this.config.uiTextSize);
     this.config.x = windowWidth - textWidth(" Made by Joseph Hand  "); //Thanks Jason for crippling my effort & code ;)
     this.config.y = windowHeight - textAscent("W") * 1.5;
@@ -537,7 +716,7 @@ function setup() {
 
 function draw() {
   background(255);
-  for(let i = 0; i < UIElements.length; i++) {
+  for(let i = 0; i < UIElements.length; i++) { //Sorts in ascending order, so display in that order
     UIElements[i].tick();
   }
 
@@ -549,13 +728,28 @@ function draw() {
         let cUIConf = cUI.getConfig();
         if(cUI.isThisElementClass(dynUIUUIDS.DRAWINGAREA) == true) { //Find the drawing area element
 
-          //console.log("PM ", cUIConf.calculateStatistics().pointsMapped)
-
           if(cUIConf.calculateStatistics().pointsMapped >= cUIConf.automaticMappedPointsPercentageCutoff && mouseIsPressed == false) { //Switch at the designated cutoff when the mouse is released
-            gameState = gameStates.GAME_GETNEWTASK; //Update user data & UI
+            createTransitionElement(cUI); //Creates the user progress dialog
+            gameState = gameStates.GAME_PROGRESSTRANSITION; //Show user their score / progress -> Update user data & UI
+            return;
           }
         }
       }
+      break;
+
+    case gameStates.GAME_PROGRESSTRANSITION:
+      let cDrawingUI = null; //Get the drawing area's UI Element to get screenshot bounds
+      let cDrawingUIConf = null;
+      for(let i = 0; i < UIElements.length; i++) //Search & find the drawing area element
+        if(UIElements[i].isThisElementClass(dynUIUUIDS.EXERCISETRANSITION) == true) {
+          cDrawingUI = UIElements[i];
+
+          if(cDrawingUI.getConfig().getUserUICompletion() == 1) { //Check if the user progressed through the completion screen (aka 100%)
+            UIElements.splice(i, 1); //Remove the screen for the next progress
+            gameState = gameStates.GAME_GETNEWTASK;
+            //return; //Prevent going over the loop's former limit (we dynamically removed an element)
+          }
+        }
       break;
 
     case gameStates.GAME_GETNEWTASK:
@@ -578,17 +772,7 @@ function draw() {
       let exerciseStats = cUIConf.calculateStatistics();
       let exerciseType = cUIConf.drawingExerciseType;
 
-      let overallAccuracyNumerator = 0;
-      let overallAccuracyTotalNumberOfAttempts = 0;
-      for(let i = 0; i < userData.attempts.length; i++) { //Recalculate overall accuracy with new data
-        if(userData.attempts[i].type == exerciseType) { //Only if it's the same type of exercise
-          overallAccuracyNumerator = overallAccuracyNumerator + userData.attempts[i].accuracy;
-          overallAccuracyTotalNumberOfAttempts++;
-        }
-      }
-      let overallAccuracy = ( overallAccuracyNumerator + exerciseStats.accuracy ) / ( overallAccuracyTotalNumberOfAttempts + 1 ); //Add in the new score for the drawing area
-
-      createUserCard(0, exerciseStats.accuracy, sketchZoneImage, exerciseType, overallAccuracy); //Inserts new card at the beginning of the stack
+      createUserCard(0, exerciseStats.accuracy, sketchZoneImage, exerciseType, exerciseStats.newOverallAccuracy); //Inserts new card at the beginning of the stack
       
       /* Update userData & local storage */
       if(userData.currentExercise + 1 >= db["symbols"].total) //Roll back to the first exercise if it is bigger than the max
@@ -599,7 +783,7 @@ function draw() {
       userData.attempts.push({
         type: exerciseType,
         accuracy: exerciseStats.accuracy,
-        overallAccuracy: overallAccuracy,
+        overallAccuracy: exerciseStats.newOverallAccuracy,
         preview: sketchZoneImage
       });
 
@@ -619,7 +803,7 @@ function draw() {
       createDrawingArea(); //Reinitialize
 
       gameState = gameStates.GAME_DYNUSERUPDATE;
-      break;
+      return; //Prevent unintended consequences from not updating the loop properly
 
     default:
       break;
