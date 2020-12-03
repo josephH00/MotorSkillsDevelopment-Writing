@@ -20,7 +20,7 @@ const textScaling = {
   initWH: 2267, //The initial width + height of the screen size (1920 x 1080 running Google Chrome with default settings + Bookmark bar)
   fontScalingFactor: 1.25, //Scale by 1.25x per window increase from the base size
   scale: function(ogSize) { //Scaling function will increase the text size by a scaling factor as the screen size increases from 1920x1080 and decreases as it gets smaller
-    return ogSize + ogSize * ((windowWidth + windowHeight) / this.initWH - 1) * this.fontScalingFactor;
+    return ogSize + ogSize * ((width + height) / this.initWH - 1) * this.fontScalingFactor;
   }
 }
 
@@ -206,9 +206,9 @@ function createUserCard(CN, specificAccuracy, imgPreview, specificType, overallA
       thisAttemptExerciseType: specificType,
       overallExerciseAccuracy: overallAccuracy,
 
-      width: Math.floor(windowWidth * 3/4 / 6), //The width of the card. 6 cards in a 3/4 chunk of the screen
-      height: Math.floor( windowHeight / 8 - 2 * (windowHeight / 8 / 16) ), //The height of the card. This will center the card in between the top of the screen & the top bar
-      XYSpacer: { x: 8, y: floor(windowHeight / 8 / 16) }, //This is the amount that is added to the x & y values of the card to space it in the middle of the top bar & from the edge
+      width: Math.floor(width * 3/4 / 6), //The width of the card. 6 cards in a 3/4 chunk of the screen
+      height: Math.floor( height / 8 - 2 * (height / 8 / 16) ), //The height of the card. This will center the card in between the top of the screen & the top bar
+      XYSpacer: { x: 8, y: floor(height / 8 / 16) }, //This is the amount that is added to the x & y values of the card to space it in the middle of the top bar & from the edge
 
       uiTextSize: 9, //Default text size for 1920x1080 @ default/no scaling
 
@@ -403,7 +403,7 @@ function createDrawingArea() {
         let pointsMappedPercent = accuracyScore.pointsMappedLength / this.pointsArray.length;
         if(isNaN(accuracyScore.accuracy) == false) {
           textSize(textScaling.scale(12));
-          rect(width/2 - this.sketchZone.width/2, height/2 + this.sketchZone.height/2, textWidth(" Accuracy: ##% Completed: ##%"), textAscent("W") * 1.15);
+          rect(width/2 - this.sketchZone.width/2, height/2 + this.sketchZone.height/2, textWidth(" Accuracy: " + (100 * accuracyScore.accuracy).toFixed(0) + "%" + " Completed: " + (100 * pointsMappedPercent).toFixed(0) + "%"), textAscent("W") * 1.15);
           text(" Accuracy: " + (100 * accuracyScore.accuracy).toFixed(0) + "%" + " Completed: " + (100 * pointsMappedPercent).toFixed(0) + "%", width/2 - this.sketchZone.width/2, height/2 + this.sketchZone.height/2 + textAscent("W"));
         }
       },
@@ -508,7 +508,7 @@ function createTransitionElement(previousDrawingArea) {
       return;
     
     stroke( 255 - this.config.setFillAdjustForTime(color(255,255,255)) ); //The opacity will change as the transition goes until it's limit
-    rect(this.config.x, this.config.y, windowWidth - 2 * this.config.widthHeightBounds.w, windowHeight - 2 * this.config.widthHeightBounds.h); //Bounding box
+    rect(this.config.x, this.config.y, width - 2 * this.config.widthHeightBounds.w, height - 2 * this.config.widthHeightBounds.h); //Bounding box
     
     this.config.setFillAdjustForTime(color(0,0,0)); //Need to fill this
 
@@ -532,7 +532,7 @@ function createTransitionElement(previousDrawingArea) {
     textSize(textScaling.scale(this.config.feedbackFontInfo.categoryDescriptor.size)); //Draws right-hand-side statistics values
     let textDivision = (this.config.cardWH.h - this.config.feedbackFontInfo.categoryDescriptor.height * this.config.feedbackDialogInfo.length) / (this.config.feedbackDialogInfo.length + 1); //Divides text spaces into even sections that fit the n number of sections + text height
     for(let i = 0; i < this.config.feedbackDialogInfo.length; i++) {
-      text(this.config.feedbackDialogInfo[i].label + this.config.feedbackDialogInfo[i].data, this.config.x + (windowWidth - 2 * this.config.widthHeightBounds.w)/2 , this.config.y + this.config.widthHeightBounds.h + (i) * textDivision);
+      text(this.config.feedbackDialogInfo[i].label + this.config.feedbackDialogInfo[i].data, this.config.x + (width - 2 * this.config.widthHeightBounds.w)/2 , this.config.y + this.config.widthHeightBounds.h + (i) * textDivision);
     }
 
   }, function() {
@@ -550,7 +550,7 @@ function createTransitionElement(previousDrawingArea) {
       this.config.lastDrawingElement.getConfig().sketchZone.width,
       this.config.lastDrawingElement.getConfig().sketchZone.height
     );
-    this.config.drawingElementImage.resize(this.config.widthHeightBounds.w  * 1.5 * (1 - this.config.widthHeightBounds.w/windowWidth), 0); //Scale the image to the 150% of the dialog box's width
+    this.config.drawingElementImage.resize(this.config.widthHeightBounds.w  * 1.5 * (1 - this.config.widthHeightBounds.w/width), 0); //Scale the image to the 150% of the dialog box's width
 
     let drawingStats = this.config.lastDrawingElement.getConfig().calculateStatistics(); //Get the text to display for stats
     this.config.feedbackDialogInfo = [
@@ -571,12 +571,12 @@ function createTransitionElement(previousDrawingArea) {
       lastDrawingElement: previousDrawingArea,
       drawingElementImage: null,
 
-      widthHeightBounds: { w: 1/7 * windowWidth, h: 2.5/16 * windowHeight },
+      widthHeightBounds: { w: 1/7 * width, h: 2.5/16 * height },
       cardBuffer: { 
-        w: 1/16 * ( windowWidth - 2 * ( 1/7 * windowWidth )    ),
-        h: 1/16 * ( windowHeight - 2 * ( 2.5/16 * windowHeight ) )
+        w: 1/16 * ( width - 2 * ( 1/7 * width )    ),
+        h: 1/16 * ( height - 2 * ( 2.5/16 * height ) )
       }, //Buffer to draw from size of card
-      cardWH: { w: windowWidth - 2 * ( 1/7 * windowWidth ), h: windowHeight - 2 * ( 2.5/16 * windowHeight ) },
+      cardWH: { w: width - 2 * ( 1/7 * width ), h: height - 2 * ( 2.5/16 * height ) },
 
       feedbackDialogHeading: [ //What to display to the user based on the accuracy of the exercise
         { 
@@ -659,8 +659,11 @@ function preload() {
 
 function setup() {
   gameState = gameStates.STARTUPUI; //preload() is called under the DATAINIT state & will automatically transition to the setup() when synchronously finished
-
-  createCanvas(windowWidth, windowHeight);
+  let a = document.getElementById('gameContainer').getBoundingClientRect();
+  document.getElementById('gameContainer').left = 0;
+  console.log(a);
+  console.log()
+  createCanvas(windowWidth - 2*8, windowHeight - 1.5*a.bottom);
   frameRate(60);
 
   //Top header
@@ -669,8 +672,8 @@ function setup() {
       rect(this.config.x, this.config.y, this.config.width, this.config.height);
     }, function(d) {},
     {
-      width: windowWidth + 1,
-      height: windowHeight / 8
+      width: width + 1,
+      height: height / 8
     }
   ) );
 
@@ -678,10 +681,10 @@ function setup() {
   UIElements.pushSortByDrawingHeight( new DynamicUI(dynUIUUIDS.UPPERACCURACY, dynDrawingHeights.LEVEL1, 0, 0, function() {
       textSize(this.config.uiTextSize);
       
-      this.config.x = windowWidth - textWidth("Game Accuracy: XX%  "); //Adjust x at runtime based on size of the text
+      this.config.x = width - textWidth("Game Accuracy: XX%  "); //Adjust x at runtime based on size of the text
 
       let buffer = { x: textWidth(" "), y: textAscent() * 3/4 } //Create buffer between box & text
-      let sizeBox = { w: windowWidth - this.config.x - buffer.x, h: textAscent() + buffer.y }
+      let sizeBox = { w: width - this.config.x - buffer.x, h: textAscent() + buffer.y }
 
       fill(color(247, 247, 247));
       rect(this.config.x - buffer.x, this.config.y, sizeBox.w, sizeBox.h); //Set space for rect
@@ -696,10 +699,10 @@ function setup() {
 
   UIElements.pushSortByDrawingHeight( new DynamicUI(dynUIUUIDS.ATTRIBUTION, dynDrawingHeights.LEVEL1, 0, 0, function() {
     textSize(this.config.uiTextSize);
-    this.config.x = windowWidth - textWidth(" Made by Joseph Hand  "); //Thanks Jason for crippling my effort & code ;)
-    this.config.y = windowHeight - textAscent("W") * 1.5;
+    this.config.x = width - textWidth(" Made by Joseph Hand  "); //Thanks Jason for crippling my effort & code ;)
+    this.config.y = height - textAscent("W") * 1.5;
     let buffer = { x: textWidth(""), y: textAscent() * 3/4 } //Create buffer between box & text
-    let sizeBox = { w: windowWidth - this.config.x - buffer.x, h: textAscent() + buffer.y }
+    let sizeBox = { w: width - this.config.x - buffer.x, h: textAscent() + buffer.y }
 
     fill(color(247, 247, 247));
     rect(this.config.x - buffer.x, this.config.y, sizeBox.w, sizeBox.h); //Set space for rect

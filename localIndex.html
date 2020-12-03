@@ -2,43 +2,36 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Sketch</title>
+        <title>FMS Drawing</title>
 
         <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
         <style>
-            #body {
-                color: grey;
-            }
-
-            #game {
-                background: linear-gradient(to right,gold,maroon,black);
-                color: Yellow;
-                border: 1px solid black;
-            }
-
-            #game:hover {
-                border: 2px dotted black;
-                opacity: .5;
-            }
-
             #gameContainer {
+                top: 0;
+                left:0px;
                 background: linear-gradient(to right,gold,maroon,black);
-            }
-
-            h1 {
-                color: black;
-                border: 1px solid black;
-            }
+                line-height: 12px;
+                margin-left: 0;
+            } 
+            canvas {
+                display: block;
+                left:0;
+            } 
+            h5 {
+                left: 0;
+                top: 0;
+                margin: 2px;
+            }      
         </style>
     </head>
     <body>
-        <div></div>
-        <div>
-            <div id="gameContainer">
-                <h1>FMS fine motor skills Application</h1>
-                <script src="sketch.js"></script>
-            </div>
+        
+        <div id="gameContainer">
+            <h5>FMS Drawing</h5>
+            <script src="sketch.js"></script>
+        </div>
+
     </body>
 </html>
