@@ -275,7 +275,16 @@ function createDrawingArea() {
       pointsArray: [],
       internalTickCounter: 0,
 
-      automaticMappedPointsPercentageCutoff: 0.85, //85% cut off when the stage ends
+      automaticMappedPointsPercentageCutoff: 0.60, //60% cut off when the stage ends
+      mouseInactiveTimeout: 1500, //The milliseconds when the mouse isn't moving & is above the cutoff
+      lastTimeMouseMoved: null,
+      isFinishedWithExercise: function() { //Calculates if the automatic cutoff has been reached and the user has stopped moving their mouse for a specified period of time
+        return (this.calculateStatistics().pointsMapped >= this.automaticMappedPointsPercentageCutoff 
+                && mouseIsPressed == false 
+                && millis() - this.lastTimeMouseMoved > this.mouseInactiveTimeout
+                ) ? true : false;
+      },
+
       mouseSpeed: 70, //70 ms per each point to draw
       drawDebugLines: false, //Draws the slopes & boundaries for the point association
 
@@ -320,8 +329,10 @@ function createDrawingArea() {
         this.internalTickCounter = this.internalTickCounter + elapsedTime;
         if(this.internalTickCounter >= this.mouseSpeed) {
           this.internalTickCounter = 0;
-          if(mouseIsPressed && (movedX != 0 || movedY != 0))
+          if(mouseIsPressed && (movedX != 0 || movedY != 0)) {
             this.mouseArray.push({x: mouseX, y: mouseY});
+            this.lastTimeMouseMoved = millis(); //Updates when the mouse moves
+          }
         }
       },
       calculateStatistics: function() { //Calculate the statistics & accuracy of the drawing
@@ -561,7 +572,7 @@ function createTransitionElement(previousDrawingArea) {
       feedbackDialogHeading: [ //What to display to the user based on the accuracy of the exercise
         { 
           main: "Awesome!",
-          sub: "Let's do something new",
+          sub: "Let's try something new",
           min: 0.90,
           max: 1
         },
@@ -592,8 +603,8 @@ function createTransitionElement(previousDrawingArea) {
       },
     
       transitionMillisInit: null, //Get the time when the transition element was created, set during init()
-      transitionDurationUntilFade: 5000, //The milliseconds for how long the transition element will last
-      transitionFadeDuration: 1500, //Milliseconds for how long the fade of the UI element lasts
+      transitionDurationUntilFade: 4500, //The milliseconds for how long the transition element will last
+      transitionFadeDuration: 1250, //Milliseconds for how long the fade of the UI element lasts
       setFillAdjustForTime: function(c) {
         let opacityValue = 255;
         if( millis() - this.transitionMillisInit > this.transitionDurationUntilFade )
@@ -728,7 +739,7 @@ function draw() {
         let cUIConf = cUI.getConfig();
         if(cUI.isThisElementClass(dynUIUUIDS.DRAWINGAREA) == true) { //Find the drawing area element
 
-          if(cUIConf.calculateStatistics().pointsMapped >= cUIConf.automaticMappedPointsPercentageCutoff && mouseIsPressed == false) { //Switch at the designated cutoff when the mouse is released
+          if(cUIConf.isFinishedWithExercise() == true) { //Switch at the designated cutoff when the mouse is released
             createTransitionElement(cUI); //Creates the user progress dialog
             gameState = gameStates.GAME_PROGRESSTRANSITION; //Show user their score / progress -> Update user data & UI
             return;
