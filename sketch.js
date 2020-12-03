@@ -280,7 +280,7 @@ function createDrawingArea() {
       lastTimeMouseMoved: null,
       isFinishedWithExercise: function() { //Calculates if the automatic cutoff has been reached and the user has stopped moving their mouse for a specified period of time
         return (this.calculateStatistics().pointsMapped >= this.automaticMappedPointsPercentageCutoff 
-                && mouseIsPressed == false 
+                && mouseIsPressed == false //Not moving mouse
                 && millis() - this.lastTimeMouseMoved > this.mouseInactiveTimeout
                 ) ? true : false;
       },
@@ -335,7 +335,7 @@ function createDrawingArea() {
           }
         }
       },
-      calculateStatistics: function() { //Calculate the statistics & accuracy of the drawing
+      calculateAccuracy: function() { //The drawing functions continuously call calculateStatistics(), but because there is a lot of computations that aren't needed, separating this into its own function & just calling this reduces the computational load on the client
         let averageDrawnLength = 0;
         let PALength = 0; //Points that aren't null
         let averageDistBetweenPoints = 0;
@@ -346,8 +346,12 @@ function createDrawingArea() {
             PALength++;
           }
       
-        let acc = Math.abs(1-( averageDrawnLength/PALength/(averageDistBetweenPoints/2) )); //Computes accuracy of the drawn points based on the (average distance between points)/2
-        let pM = PALength/this.pointsArray.length; //The percentage of data points that are mapped to drawn points (eg. 93%)
+        return { accuracy: Math.abs(1-( averageDrawnLength/PALength/(averageDistBetweenPoints/2) )), pointsMappedLength: PALength }; //Computes accuracy of the drawn points based on the (average distance between points)/2
+      },
+      calculateStatistics: function() { //Calculate the statistics & accuracy of the drawing
+        let pointsAverageObj = this.calculateAccuracy();
+        let acc = pointsAverageObj.accuracy;
+        let pM = pointsAverageObj.pointsMappedLength / this.pointsArray.length; //The percentage of data points that are mapped to drawn points (eg. 93%)
         
         let overallAccuracyNumerator = 0;
         let overallAccuracyTotalNumberOfAttempts = 0;
@@ -357,13 +361,18 @@ function createDrawingArea() {
             overallAccuracyTotalNumberOfAttempts++;
           }
         }
+        
         let newOverallAccuracy = ( overallAccuracyNumerator + acc ) / ( overallAccuracyTotalNumberOfAttempts + 1 ); //Add in the new score for the drawing area
 
         let nPointsArray = this.pointsArray; //Find closest and longest distances, make a copy of the pointsArray & sort that
         nPointsArray.sort((a,b) => a.distPointAndMouse - b.distPointAndMouse);
         let longestDistancePointToMouse = nPointsArray[nPointsArray.length - 1].distPointAndMouse;
-        let smallestDistancePointToMouse = nPointsArray[0].distPointAndMouse;
+        let smallestDistancePointToMouse = nPointsArray.find(e => e.distPointAndMouse != null); //The first element which isn't null (not mapped to any point)
 
+        if(smallestDistancePointToMouse != undefined) //Will report 0 for the smallest distance when no points are mapped
+          smallestDistancePointToMouse = smallestDistancePointToMouse.distPointAndMouse;
+        else
+          smallestDistancePointToMouse = 0;
         return {  accuracy: acc, pointsMapped: pM, newOverallAccuracy: newOverallAccuracy, longestPointDist: longestDistancePointToMouse, smallestPointDist: smallestDistancePointToMouse   }
       },
       preComputePointGeometry: function() {
@@ -390,9 +399,11 @@ function createDrawingArea() {
         line(width/2 + this.sketchZone.width/2, height/2 - this.sketchZone.height/2,
           width/2 + this.sketchZone.width/2, height/2 + this.sketchZone.height/2);
         
-        if(isNaN(this.calculateStatistics().accuracy) == false) {
+        let accuracyScore = this.calculateAccuracy(); //Dynamic HUD for exercise accuracy
+        let pointsMappedPercent = accuracyScore.pointsMappedLength / this.pointsArray.length;
+        if(isNaN(accuracyScore.accuracy) == false) {
           rect(width/2 - this.sketchZone.width/2, height/2 + this.sketchZone.height/2, textWidth("Accuracy: ##% Completed: ##%"), textAscent("W"));
-          text("Accuracy: " + (100 * this.calculateStatistics().accuracy).toFixed(0) + "%" + " Completed: " + (100 * this.calculateStatistics().pointsMapped).toFixed(0) + "%", width/2 - this.sketchZone.width/2, height/2 + this.sketchZone.height/2 + textAscent("W")*0.9);
+          text("Accuracy: " + (100 * accuracyScore.accuracy).toFixed(0) + "%" + " Completed: " + (100 * pointsMappedPercent).toFixed(0) + "%", width/2 - this.sketchZone.width/2, height/2 + this.sketchZone.height/2 + textAscent("W")*0.9);
         }
       },
       drawPoints: function(drawDebug) {
