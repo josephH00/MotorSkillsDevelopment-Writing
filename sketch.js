@@ -659,11 +659,14 @@ function preload() {
 
 function setup() {
   gameState = gameStates.STARTUPUI; //preload() is called under the DATAINIT state & will automatically transition to the setup() when synchronously finished
-  let a = document.getElementById('gameContainer').getBoundingClientRect();
-  document.getElementById('gameContainer').left = 0;
-  console.log(a);
-  console.log()
-  createCanvas(windowWidth - 2*8, windowHeight - 1.5*a.bottom);
+
+  if(document.getElementById('gameContainer') != undefined) { //We are running on the local file with specific CSS, we need to account for that when setting the canvas size
+    document.getElementById('gameContainer').left = 0;
+    createCanvas(windowWidth - 2 * 8, windowHeight - 1.5 * document.getElementById('gameContainer').getBoundingClientRect().bottom);
+  }
+  else //Else, running w/o CSS on localIndex
+    createCanvas(windowWidth, windowHeight);
+  
   frameRate(60);
 
   //Top header
